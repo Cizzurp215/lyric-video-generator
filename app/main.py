@@ -26,6 +26,20 @@ def sanitize_filename(filename: str) -> str:
     return cleaned.strip("._") or "upload.bin"
 
 
+def is_allowed_audio_upload(upload: UploadFile) -> bool:
+    allowed_types = {
+        "audio/mpeg",
+        "audio/mp3",
+        "audio/wav",
+        "audio/x-wav",
+        "audio/wave",
+        "audio/vnd.wave",
+        "application/octet-stream",
+    }
+    extension = Path(upload.filename or "").suffix.lower()
+    return upload.content_type in allowed_types or extension in {".mp3", ".wav"}
+
+
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request) -> HTMLResponse:
     return templates.TemplateResponse("index.html", {"request": request})
@@ -37,7 +51,7 @@ async def upload_assets(
     lyrics: str = Form(...),
     background: UploadFile | None = File(default=None),
 ) -> UploadResponse:
-    if audio.content_type not in {"audio/mpeg", "audio/wav", "audio/x-wav", "audio/mp3"}:
+    if not is_allowed_audio_upload(audio):
         raise HTTPException(status_code=400, detail="Audio must be an MP3 or WAV file.")
     if not lyrics.strip():
         raise HTTPException(status_code=400, detail="Lyrics are required.")
