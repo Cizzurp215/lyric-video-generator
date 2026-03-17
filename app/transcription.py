@@ -7,8 +7,27 @@ import subprocess
 from pathlib import Path
 
 
+def find_ffprobe() -> str | None:
+    discovered = shutil.which("ffprobe")
+    if discovered:
+        return discovered
+
+    fallback_roots = [
+        Path.home() / "AppData" / "Local" / "Microsoft" / "WinGet" / "Packages",
+        Path("C:/Program Files"),
+        Path("C:/Program Files (x86)"),
+    ]
+    for root in fallback_roots:
+        if not root.exists():
+            continue
+        matches = list(root.rglob("ffprobe.exe"))
+        if matches:
+            return str(matches[0])
+    return None
+
+
 def get_media_duration(media_path: Path) -> float:
-    ffprobe_path = shutil.which("ffprobe")
+    ffprobe_path = find_ffprobe()
     if not ffprobe_path:
         raise RuntimeError("ffprobe is required to inspect media duration. Install FFmpeg first.")
     command = [

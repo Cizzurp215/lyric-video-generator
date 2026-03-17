@@ -18,6 +18,25 @@ FORMATS = {
 }
 
 
+def find_binary(binary_name: str) -> str | None:
+    discovered = shutil.which(binary_name)
+    if discovered:
+        return discovered
+
+    fallback_roots = [
+        Path.home() / "AppData" / "Local" / "Microsoft" / "WinGet" / "Packages",
+        Path("C:/Program Files"),
+        Path("C:/Program Files (x86)"),
+    ]
+    for root in fallback_roots:
+        if not root.exists():
+            continue
+        matches = list(root.rglob(binary_name))
+        if matches:
+            return str(matches[0])
+    return None
+
+
 def _build_background_input(
     background_path: Path | None,
     width: int,
@@ -43,7 +62,7 @@ def _build_background_input(
 
 
 def render_job(job: JobRecord, upload: UploadRecord, request: RenderRequest) -> None:
-    ffmpeg_path = shutil.which("ffmpeg")
+    ffmpeg_path = find_binary("ffmpeg.exe") or find_binary("ffmpeg")
     if not ffmpeg_path:
         store.update_job(
             job.job_id,

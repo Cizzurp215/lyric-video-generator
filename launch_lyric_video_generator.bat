@@ -2,6 +2,9 @@
 setlocal
 cd /d "%~dp0"
 
+set "FFMPEG_WINGET=C:\Users\%USERNAME%\AppData\Local\Microsoft\WinGet\Packages\Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe\ffmpeg-8.1-full_build\bin"
+if exist "%FFMPEG_WINGET%\ffmpeg.exe" set "PATH=%FFMPEG_WINGET%;%PATH%"
+
 set "PYTHON_CMD="
 where py >nul 2>nul
 if %errorlevel%==0 set "PYTHON_CMD=py -3"
