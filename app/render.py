@@ -130,6 +130,7 @@ def render_job(job: JobRecord, upload: UploadRecord, request: RenderRequest) -> 
             upload.background_path, width, height, request.background_dim
         )
         subtitle_filter_path = subtitle_path.as_posix().replace(":", r"\:")
+        filter_complex = f"{filter_complex};[bg]ass={subtitle_filter_path}[vout]"
 
         command = [
             ffmpeg_path,
@@ -140,11 +141,9 @@ def render_job(job: JobRecord, upload: UploadRecord, request: RenderRequest) -> 
             "-filter_complex",
             filter_complex,
             "-map",
-            "[bg]",
+            "[vout]",
             "-map",
             "1:a:0",
-            "-vf",
-            f"ass={subtitle_filter_path}",
             "-c:v",
             "libx264",
             "-preset",
