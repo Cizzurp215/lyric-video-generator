@@ -129,8 +129,10 @@ def render_job(job: JobRecord, upload: UploadRecord, request: RenderRequest) -> 
         input_args, filter_complex = _build_background_input(
             upload.background_path, width, height, request.background_dim
         )
-        subtitle_filter_path = subtitle_path.as_posix().replace(":", r"\:")
-        filter_complex = f"{filter_complex};[bg]ass={subtitle_filter_path}[vout]"
+        subtitle_filter_path = subtitle_path.as_posix().replace("\\", "/")
+        subtitle_filter_path = subtitle_filter_path.replace(":", r"\:")
+        subtitle_filter_path = subtitle_filter_path.replace("'", r"\'")
+        filter_complex = f"{filter_complex};[bg]ass=filename='{subtitle_filter_path}'[vout]"
 
         command = [
             ffmpeg_path,
