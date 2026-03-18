@@ -6,10 +6,13 @@ Local FastAPI app that turns an audio track plus lyrics into MP4 lyric videos fo
 
 - Upload MP3 or WAV audio.
 - Paste lyrics and optionally add a background image or looping video.
+- Choose artist presets with reusable font/color styling.
 - Render `1920x1080`, `1080x1920`, or both.
 - Burn animated ASS subtitles into the final MP4.
+- Export caption files as `.srt`.
 - Track render progress and download completed files from the browser.
-- Use local Whisper when installed, with a duration-based fallback when it is not.
+- Preview finished outputs in the browser.
+- Use `faster-whisper` or OpenAI Whisper when installed, with a duration-based fallback when neither is available.
 
 ## Project Structure
 
@@ -51,6 +54,12 @@ Optional Whisper support:
 pip install openai-whisper
 ```
 
+Faster local alignment option:
+
+```bash
+pip install faster-whisper
+```
+
 ## FFmpeg Install
 
 1. Download FFmpeg and add the `bin` folder containing `ffmpeg.exe` and `ffprobe.exe` to `PATH`.
@@ -84,7 +93,7 @@ If you prefer double-clicking instead of using a terminal, run [launch_lyric_vid
 2. Upload `song.mp3` and paste lyrics.
 3. Optionally add `cover.jpg` or `background.mp4`.
 4. Render `Both`.
-5. Download `youtube.mp4` and `tiktok.mp4`.
+5. Preview and download `youtube.mp4`, `tiktok.mp4`, and `captions.srt`.
 
 ## Sample Test Assets Layout
 
@@ -100,11 +109,13 @@ tests/assets/
 - `ffmpeg was not found`
   Install FFmpeg and make sure both `ffmpeg` and `ffprobe` are on `PATH`.
 - `Local Whisper was not found`
-  The app still renders using even lyric timing. Install `openai-whisper` for better timestamps.
+  The app still renders using even lyric timing. Install `faster-whisper` or `openai-whisper` for better timestamps.
 - Render fails when using ASS subtitles on Windows
   Keep the project in a simple local path and avoid special characters in filenames.
 - Audio uploads are rejected
   Use MP3 or WAV files only in this MVP.
+- Browser playback stops early
+  Restart the app after pulling the latest changes. The export now writes browser-safe MP4s with `+faststart` and `yuv420p`.
 
 ## Notes
 

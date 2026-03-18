@@ -8,6 +8,9 @@ from pydantic import BaseModel, Field
 class RenderRequest(BaseModel):
     upload_id: str = Field(min_length=8)
     output_mode: Literal["horizontal", "vertical", "both"] = "both"
+    artist_name: str = Field(default="Creative Space", max_length=80)
+    preset_name: str = Field(default="creative-space")
+    font_name: str = Field(default="Montserrat Bold", max_length=80)
     font_size: int = Field(default=56, ge=24, le=120)
     text_position: Literal["top", "middle", "bottom"] = "bottom"
     primary_color: str = "#FFFFFF"

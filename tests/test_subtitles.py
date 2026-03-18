@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from app.lyrics import LyricLine
-from app.subtitles import build_ass_subtitles, seconds_to_ass
+from app.subtitles import build_ass_subtitles, build_srt_subtitles, seconds_to_ass
 
 
 def test_seconds_to_ass_formats_centiseconds() -> None:
@@ -24,3 +24,14 @@ def test_build_ass_subtitles_writes_events(tmp_path: Path) -> None:
     content = target.read_text(encoding="utf-8")
     assert "Hello world" in content
     assert "Style: Default" in content
+
+
+def test_build_srt_subtitles_writes_caption_rows(tmp_path: Path) -> None:
+    target = tmp_path / "demo.srt"
+    build_srt_subtitles(
+        [LyricLine(text="Hello world", start=0.0, end=3.5)],
+        target,
+    )
+    content = target.read_text(encoding="utf-8")
+    assert "00:00:00,000 --> 00:00:03,500" in content
+    assert "Hello world" in content

@@ -4,7 +4,9 @@ const statusText = document.getElementById("status-text");
 const progressBar = document.getElementById("progress-bar");
 const warningsList = document.getElementById("warnings");
 const downloads = document.getElementById("downloads");
+const previews = document.getElementById("previews");
 const submitButton = form.querySelector("button[type='submit']");
+const presets = window.LYRIC_PRESETS || {};
 
 let pollHandle = null;
 
@@ -32,8 +34,28 @@ function setDownloads(jobId, outputs) {
   Object.keys(outputs).forEach((formatName) => {
     const link = document.createElement("a");
     link.href = `/download/${jobId}/${formatName}`;
-    link.textContent = `Download ${formatName}`;
+    link.textContent = formatName === "captions" ? "Download captions (.srt)" : `Download ${formatName}`;
     downloads.appendChild(link);
+  });
+}
+
+function setPreviews(jobId, outputs) {
+  previews.innerHTML = "";
+  ["horizontal", "vertical"].forEach((formatName) => {
+    if (!outputs[formatName]) {
+      return;
+    }
+    const card = document.createElement("article");
+    card.className = "preview-card";
+    const title = document.createElement("h3");
+    title.textContent = formatName === "horizontal" ? "YouTube Preview" : "TikTok Preview";
+    const video = document.createElement("video");
+    video.controls = true;
+    video.preload = "metadata";
+    video.src = `/artifact/${jobId}/${formatName}`;
+    card.appendChild(title);
+    card.appendChild(video);
+    previews.appendChild(card);
   });
 }
 
@@ -48,6 +70,7 @@ async function pollStatus(jobId) {
     clearInterval(pollHandle);
     pollHandle = null;
     setDownloads(jobId, payload.outputs || {});
+    setPreviews(jobId, payload.outputs || {});
     setBusy(false);
   }
 
@@ -62,6 +85,7 @@ form.addEventListener("submit", async (event) => {
   event.preventDefault();
   statusPanel.classList.remove("hidden");
   downloads.innerHTML = "";
+  previews.innerHTML = "";
   setWarnings([]);
   setStatus("Uploading assets", 4);
   setBusy(true);
@@ -92,6 +116,9 @@ form.addEventListener("submit", async (event) => {
       body: JSON.stringify({
         upload_id: uploadPayload.upload_id,
         output_mode: form.elements.output_mode.value,
+        artist_name: form.elements.artist_name.value,
+        preset_name: form.elements.preset_name.value,
+        font_name: form.elements.font_name.value,
         font_size: Number(form.elements.font_size.value),
         text_position: form.elements.text_position.value,
         primary_color: form.elements.primary_color.value,
@@ -121,3 +148,22 @@ form.addEventListener("submit", async (event) => {
     return;
   }
 });
+
+const presetSelect = document.getElementById("preset-select");
+const fontSelect = document.getElementById("font-select");
+
+if (presetSelect) {
+  presetSelect.addEventListener("change", () => {
+    const preset = presets[presetSelect.value];
+    if (!preset) {
+      return;
+    }
+    form.elements.font_name.value = preset.font_name;
+    form.elements.font_size.value = preset.font_size;
+    form.elements.text_position.value = preset.text_position;
+    form.elements.primary_color.value = preset.primary_color;
+    form.elements.highlight_color.value = preset.highlight_color;
+    form.elements.background_dim.value = preset.background_dim;
+  });
+  presetSelect.dispatchEvent(new Event("change"));
+}

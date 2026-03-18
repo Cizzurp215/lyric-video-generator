@@ -13,6 +13,30 @@
       <h1>Lyric Video Generator</h1>
       <p class="lede">Upload a song, paste lyrics, choose output format, and render ready-to-post MP4s.</p>
       <form id="generator-form">
+        <div class="grid">
+          <label>
+            <span>Artist name</span>
+            <input type="text" name="artist_name" value="Creative Space" maxlength="80" />
+          </label>
+          <label>
+            <span>Brand preset</span>
+            <select name="preset_name" id="preset-select">
+              {% for preset_id, preset in presets.items() %}
+              <option value="{{ preset_id }}">{{ preset.label }}</option>
+              {% endfor %}
+            </select>
+          </label>
+          <label>
+            <span>Font</span>
+            <select name="font_name" id="font-select">
+              <option value="Montserrat Bold">Montserrat Bold</option>
+              <option value="Arial Bold">Arial Bold</option>
+              <option value="Trebuchet MS Bold">Trebuchet MS Bold</option>
+              <option value="Verdana Bold">Verdana Bold</option>
+            </select>
+          </label>
+        </div>
+
         <label>
           <span>Song file</span>
           <input type="file" name="audio" accept=".mp3,.wav,audio/mpeg,audio/wav" required />
@@ -71,9 +95,13 @@
         <div class="progress-track"><div id="progress-bar" class="progress-bar"></div></div>
         <ul id="warnings"></ul>
         <div id="downloads" class="downloads"></div>
+        <div id="previews" class="previews"></div>
       </section>
     </section>
   </main>
+  <script>
+    window.LYRIC_PRESETS = {{ presets | tojson }};
+  </script>
   <script src="/static/app.js"></script>
 </body>
 </html>

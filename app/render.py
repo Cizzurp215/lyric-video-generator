@@ -8,7 +8,7 @@ from .config import DEFAULT_FONT, RENDERS_DIR, TEMP_DIR
 from .jobs import JobRecord, UploadRecord, store
 from .lyrics import align_lyrics, load_lyrics
 from .models import RenderRequest
-from .subtitles import build_ass_subtitles
+from .subtitles import build_ass_subtitles, build_srt_subtitles
 from .transcription import get_media_duration, transcribe_audio
 
 
@@ -117,7 +117,7 @@ def render_job(job: JobRecord, upload: UploadRecord, request: RenderRequest) -> 
             subtitle_path,
             width=width,
             height=height,
-            font_name=DEFAULT_FONT,
+            font_name=request.font_name or DEFAULT_FONT,
             font_size=request.font_size if mode == "horizontal" else max(request.font_size - 6, 24),
             text_position=request.text_position,
             primary_color=request.primary_color,
@@ -152,6 +152,10 @@ def render_job(job: JobRecord, upload: UploadRecord, request: RenderRequest) -> 
             "medium",
             "-crf",
             "20",
+            "-pix_fmt",
+            "yuv420p",
+            "-movflags",
+            "+faststart",
             "-c:a",
             "aac",
             "-b:a",
@@ -174,6 +178,10 @@ def render_job(job: JobRecord, upload: UploadRecord, request: RenderRequest) -> 
             return
 
         outputs[mode] = output_path.name
+
+    srt_path = RENDERS_DIR / job.job_id / "captions.srt"
+    build_srt_subtitles(aligned_lines, srt_path)
+    outputs["captions"] = srt_path.name
 
     store.update_job(
         job.job_id,

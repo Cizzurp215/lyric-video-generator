@@ -47,9 +47,27 @@ def get_media_duration(media_path: Path) -> float:
 
 def transcribe_audio(audio_path: Path) -> tuple[list[dict[str, float | str]], list[str]]:
     warnings: list[str] = []
+    faster_whisper_module = importlib.util.find_spec("faster_whisper")
+    if faster_whisper_module is not None:
+        faster_whisper = importlib.import_module("faster_whisper")
+        model = faster_whisper.WhisperModel("small", device="cpu", compute_type="int8")
+        segments, _ = model.transcribe(str(audio_path), vad_filter=True)
+        payload = [
+            {
+                "start": float(segment.start),
+                "end": float(segment.end),
+                "text": str(segment.text).strip(),
+            }
+            for segment in segments
+            if str(segment.text).strip()
+        ]
+        if payload:
+            warnings.append("Used faster-whisper for local lyric timing.")
+            return payload, warnings
+
     whisper_module = importlib.util.find_spec("whisper")
     if whisper_module is None:
-        warnings.append("Local Whisper was not found. Falling back to duration-based lyric timing.")
+        warnings.append("No local Whisper engine was found. Falling back to duration-based lyric timing.")
         return [], warnings
 
     whisper = importlib.import_module("whisper")
@@ -66,4 +84,6 @@ def transcribe_audio(audio_path: Path) -> tuple[list[dict[str, float | str]], li
     ]
     if not segments:
         warnings.append("Whisper returned no segments. Falling back to duration-based lyric timing.")
+    else:
+        warnings.append("Used OpenAI Whisper for local lyric timing.")
     return segments, warnings

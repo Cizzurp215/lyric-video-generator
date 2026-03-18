@@ -12,6 +12,7 @@ from fastapi.templating import Jinja2Templates
 from .config import RENDERS_DIR, STATIC_DIR, TEMPLATES_DIR
 from .jobs import UploadRecord, store
 from .models import JobStatusResponse, RenderRequest, UploadResponse
+from .presets import PRESETS
 from .render import FORMATS, render_job
 
 
@@ -42,7 +43,7 @@ def is_allowed_audio_upload(upload: UploadFile) -> bool:
 
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request) -> HTMLResponse:
-    return templates.TemplateResponse("index.html", {"request": request})
+    return templates.TemplateResponse("index.html", {"request": request, "presets": PRESETS})
 
 
 @app.post("/upload", response_model=UploadResponse)
@@ -125,10 +126,32 @@ async def job_status(job_id: str) -> JobStatusResponse:
 
 @app.get("/download/{job_id}/{format_name}")
 async def download(job_id: str, format_name: str) -> FileResponse:
-    if format_name not in FORMATS:
+    filename_map = {
+        "horizontal": "youtube.mp4",
+        "vertical": "tiktok.mp4",
+        "captions": "captions.srt",
+    }
+    if format_name not in filename_map:
         raise HTTPException(status_code=404, detail="Format not found.")
-    output_name = FORMATS[format_name]["suffix"] + ".mp4"
+    output_name = filename_map[format_name]
     absolute_path = RENDERS_DIR / job_id / output_name
     if not absolute_path.exists():
         raise HTTPException(status_code=404, detail="File not ready.")
-    return FileResponse(absolute_path, media_type="video/mp4", filename=output_name)
+    media_type = "text/plain" if output_name.endswith(".srt") else "video/mp4"
+    return FileResponse(absolute_path, media_type=media_type, filename=output_name)
+
+
+@app.get("/artifact/{job_id}/{format_name}")
+async def artifact(job_id: str, format_name: str) -> FileResponse:
+    filename_map = {
+        "horizontal": "youtube.mp4",
+        "vertical": "tiktok.mp4",
+        "captions": "captions.srt",
+    }
+    if format_name not in filename_map:
+        raise HTTPException(status_code=404, detail="Format not found.")
+    absolute_path = RENDERS_DIR / job_id / filename_map[format_name]
+    if not absolute_path.exists():
+        raise HTTPException(status_code=404, detail="File not ready.")
+    media_type = "text/plain" if absolute_path.suffix == ".srt" else "video/mp4"
+    return FileResponse(absolute_path, media_type=media_type)

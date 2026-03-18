@@ -107,3 +107,21 @@ def build_ass_subtitles(
         events="\n".join(events),
     )
     subtitle_path.write_text(payload, encoding="utf-8")
+
+
+def seconds_to_srt(seconds: float) -> str:
+    total_milliseconds = int(round(seconds * 1000))
+    hours, remainder = divmod(total_milliseconds, 3600000)
+    minutes, remainder = divmod(remainder, 60000)
+    secs, millis = divmod(remainder, 1000)
+    return f"{hours:02d}:{minutes:02d}:{secs:02d},{millis:03d}"
+
+
+def build_srt_subtitles(aligned_lines: list[LyricLine], subtitle_path: Path) -> None:
+    rows: list[str] = []
+    for index, line in enumerate(aligned_lines, start=1):
+        rows.append(str(index))
+        rows.append(f"{seconds_to_srt(line.start)} --> {seconds_to_srt(line.end)}")
+        rows.append(line.text)
+        rows.append("")
+    subtitle_path.write_text("\n".join(rows).strip() + "\n", encoding="utf-8")

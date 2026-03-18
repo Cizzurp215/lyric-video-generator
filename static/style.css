@@ -140,6 +140,7 @@ button {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
+  margin-top: 16px;
 }
 
 .downloads a {
@@ -149,6 +150,37 @@ button {
   border-radius: 999px;
   background: rgba(78, 205, 196, 0.14);
   border: 1px solid rgba(78, 205, 196, 0.28);
+}
+
+.previews {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.preview-card {
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.preview-card h3 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-size: 1rem;
+}
+
+.preview-card video {
+  width: 100%;
+  border-radius: 12px;
+  background: #000;
+}
+
+button:disabled {
+  opacity: 0.7;
+  cursor: progress;
 }
 
 @media (max-width: 720px) {
