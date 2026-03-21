@@ -15,8 +15,6 @@ ScaledBorderAndShadow: yes
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
 Style: Default,{font_name},{font_size},{primary_color},{highlight_color},&H64000000,&H78000000,-1,0,0,0,100,100,0,0,1,2,1,{alignment},{margin_lr},{margin_lr},{margin_v},1
-Style: ContextTop,{font_name},{context_size},{context_color},{highlight_color},&H64000000,&H78000000,-1,0,0,0,100,100,0,0,1,2,1,{alignment},{margin_lr},{margin_lr},{context_top_margin_v},1
-Style: ContextBottom,{font_name},{context_size},{context_color},{highlight_color},&H64000000,&H78000000,-1,0,0,0,100,100,0,0,1,2,1,{alignment},{margin_lr},{margin_lr},{context_bottom_margin_v},1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
@@ -60,50 +58,34 @@ def build_ass_subtitles(
     margin_map = {"top": 90, "middle": 80, "bottom": 120}
     alignment = alignment_map[text_position]
     margin_v = margin_map[text_position]
-    if text_position == "bottom":
-        context_top_margin_v = margin_v + 74
-        context_bottom_margin_v = max(margin_v - 74, 40)
-    elif text_position == "top":
-        context_top_margin_v = max(margin_v - 74, 40)
-        context_bottom_margin_v = margin_v + 74
-    else:
-        context_top_margin_v = margin_v + 74
-        context_bottom_margin_v = max(margin_v - 74, 40)
-    context_size = max(font_size - 12, 24)
-    context_color = "&H80FFFFFF"
 
     events: list[str] = []
-    for index, line in enumerate(aligned_lines):
+    for line in aligned_lines:
         start = seconds_to_ass(line.start)
         end = seconds_to_ass(line.end)
-        previous_line = aligned_lines[index - 1].text if index > 0 else ""
-        next_line = aligned_lines[index + 1].text if index + 1 < len(aligned_lines) else ""
-        if previous_line:
-            events.append(f"Dialogue: 0,{start},{end},ContextTop,,0,0,0,,{_escape_ass(previous_line)}")
         events.append(
-            "Dialogue: 1,{start},{end},Default,,0,0,0,,{{\\fad(120,180)\\move(0,18,0,0)}}{text}".format(
+            (
+                "Dialogue: 1,{start},{end},Default,,0,0,0,,"
+                "{{\\fad(80,140)\\blur0.8\\fsp6\\fax-0.12\\fscx86\\fscy86"
+                "\\t(0,120,\\fscx116\\fscy116\\blur0.25)"
+                "\\t(120,260,\\fscx100\\fscy100\\fsp0\\fax-0.04)}}{text}"
+            ).format(
                 start=start,
                 end=end,
                 text=_escape_ass(line.text),
             )
         )
-        if next_line:
-            events.append(f"Dialogue: 0,{start},{end},ContextBottom,,0,0,0,,{_escape_ass(next_line)}")
 
     payload = ASS_TEMPLATE.format(
         play_res_x=width,
         play_res_y=height,
         font_name=font_name,
         font_size=font_size,
-        context_size=context_size,
         primary_color=hex_to_ass_bgr(primary_color),
         highlight_color=hex_to_ass_bgr(highlight_color),
-        context_color=context_color,
         alignment=alignment,
         margin_lr=72,
         margin_v=margin_v,
-        context_top_margin_v=context_top_margin_v,
-        context_bottom_margin_v=context_bottom_margin_v,
         events="\n".join(events),
     )
     subtitle_path.write_text(payload, encoding="utf-8")

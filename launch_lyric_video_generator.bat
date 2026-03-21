@@ -42,7 +42,7 @@ if not exist ".venv\Scripts\uvicorn.exe" (
 
 echo Starting Lyric Video Generator at http://127.0.0.1:8000
 start "" http://127.0.0.1:8000
-call ".venv\Scripts\python.exe" -m uvicorn app.main:app --reload
+call ".venv\Scripts\python.exe" -m uvicorn app.main:app --host 127.0.0.1 --port 8000
 
 echo Server stopped.
 pause

@@ -152,18 +152,23 @@ form.addEventListener("submit", async (event) => {
 const presetSelect = document.getElementById("preset-select");
 const fontSelect = document.getElementById("font-select");
 
+function applyPreset(presetId) {
+  const preset = presets[presetId];
+  if (!preset) {
+    return;
+  }
+  presetSelect.value = presetId;
+  form.elements.font_name.value = preset.font_name;
+  form.elements.font_size.value = preset.font_size;
+  form.elements.text_position.value = preset.text_position;
+  form.elements.primary_color.value = preset.primary_color;
+  form.elements.highlight_color.value = preset.highlight_color;
+  form.elements.background_dim.value = preset.background_dim;
+}
+
 if (presetSelect) {
   presetSelect.addEventListener("change", () => {
-    const preset = presets[presetSelect.value];
-    if (!preset) {
-      return;
-    }
-    form.elements.font_name.value = preset.font_name;
-    form.elements.font_size.value = preset.font_size;
-    form.elements.text_position.value = preset.text_position;
-    form.elements.primary_color.value = preset.primary_color;
-    form.elements.highlight_color.value = preset.highlight_color;
-    form.elements.background_dim.value = preset.background_dim;
+    applyPreset(presetSelect.value);
   });
-  presetSelect.dispatchEvent(new Event("change"));
+  applyPreset(presetSelect.value);
 }

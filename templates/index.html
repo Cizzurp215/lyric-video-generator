@@ -22,7 +22,7 @@
             <span>Brand preset</span>
             <select name="preset_name" id="preset-select">
               {% for preset_id, preset in presets.items() %}
-              <option value="{{ preset_id }}">{{ preset.label }}</option>
+              <option value="{{ preset_id }}"{% if preset_id == 'creative-space' %} selected{% endif %}>{{ preset.label }}</option>
               {% endfor %}
             </select>
           </label>

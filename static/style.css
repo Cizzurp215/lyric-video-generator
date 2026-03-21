@@ -94,6 +94,16 @@ textarea {
   color: var(--text);
 }
 
+select {
+  background-color: #1d2435;
+  color: #f8fafc;
+}
+
+option {
+  background-color: #ffffff;
+  color: #111827;
+}
+
 textarea {
   resize: vertical;
 }
